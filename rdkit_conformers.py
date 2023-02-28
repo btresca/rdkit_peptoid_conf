@@ -1,3 +1,7 @@
+## Conformer  generating script for the Tresca Lab
+## Version 2s.0 by Blakely Tresca, 2023
+## Original Code from RDKit Cookbook and mcsorkun
+
 from rdkit import Chem
 from rdkit.Chem import AllChem
 from rdkit.Chem import Draw
@@ -38,8 +42,8 @@ Draw.MolToFile(m,'molecule.png')
 
 #generate a conformer library
 rmslist = []
-params = AllChem.ETKDGv2()
-m_confs = AllChem.EmbedMultipleConfs(m_3d, numConfs=1000, numThreads=0, params = params)
+#params = AllChem.ETKDGv2()
+m_confs = AllChem.EmbedMultipleConfs(m_3d, numConfs=100, numThreads=0)
 AllChem.AlignMolConformers(m_3d, RMSlist=rmslist)
 rms = AllChem.GetConformerRMS(m_3d, 1, 9, prealigned=True)
 res = AllChem.MMFFOptimizeMoleculeConfs(m_3d, numThreads=0)
@@ -52,8 +56,8 @@ for m_conf in m_confs:
     #print(Chem.MolToMolBlock(m_3d, confId=m_conf))
     #print(Chem.MolToMolBlock(m_3d, confId=m_conf),file=open('conf_'+str(m_conf)+'.mol','a+'))
     # (needs troubleshooting) m_3d.SetProp("_Name",inp_str.replace('.mol', f"conf {m_conf}"), confId=m_conf)
-    print(Chem.MolToMolBlock(m_3d, confId=m_conf),file=open(inp_str.replace('.mol', '_conf.sdf'),'a+'))
-    print('$$$$',file=open(inp_str.replace('.mol', '_conf.sdf'),'a+'))
+    print(f'conf_{m_conf} {Chem.MolToMolBlock(m_3d, confId=m_conf)}',file=open(inp_str.replace('.mol', '_conf.sdf'),'a+'))
+    print(f'\n{res[m_conf]}\n$$$$',file=open(inp_str.replace('.mol', '_conf.sdf'),'a+'))
     #Draw.MolToFile(m_3d,'molecule.png')
 
 #mols = [m_conf for m_conf in m_3d]
