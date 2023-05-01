@@ -1,6 +1,6 @@
 ## Conformer generating script for the Tresca Lab
 ## Version 2.0 by Blakely Tresca, 2023
-## Original code from RDKit Cookbook and mcsorkun
+## Original code from RDKit Cookbook and mcsorkun https://github.com/mcsorkun/Conformer-Search
 
 from rdkit import Chem
 from rdkit.Chem import AllChem
