@@ -1,5 +1,5 @@
 ## Conformer  generating script for the Tresca Lab
-## Version 2s.0 by Blakely Tresca, 2023
+## Version 1.0 by Blakely Tresca, 2023
 ## Original Code from RDKit Cookbook and mcsorkun
 
 from rdkit import Chem
