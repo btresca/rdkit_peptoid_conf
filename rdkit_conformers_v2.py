@@ -6,6 +6,7 @@ from rdkit import Chem
 from rdkit.Chem import AllChem
 from rdkit.Chem import Draw
 import math
+import os
 
 # read argument from command line
 #req_list = sys.argv[1]
@@ -13,6 +14,7 @@ import math
 # Number of conformers to be generated
 num_of_conformer=500
 max_iter=500
+rms_thresh=0.5
 # Default values for min energy conformer
 min_energy_UFF=10000
 min_energy_index_UFF=0
@@ -53,29 +55,35 @@ print(Chem.MolToMolBlock(m))
 #add hydrogens
 m_Hs = Chem.AddHs(m)
 
+# Make directory for output files
+if not os.path.exists(mol_name):
+    os.mkdir(mol_name)
+output_dir=str('./'+mol_name+'/')
+
+
 #generate a 3D structure
 m_3d = m_Hs
 AllChem.EmbedMolecule(m_3d,randomSeed=0xf00d)
-print(Chem.MolToMolBlock(m_3d),file=open(mol_name + '_3d.mol','w+'))
+print(Chem.MolToMolBlock(m_3d),file=open(output_dir + mol_name + '_3d.mol','w+'))
 
 #save an image of the 2D structure
-Draw.MolToFile(m, mol_name + '.png')
+Draw.MolToFile(m, output_dir + mol_name + '.png')
 
 #generate a conformer library
 # Generate conformers (stored inside the mol object)
 print("\nFeeding hamsters")
 rmslist = []
-m_confs = AllChem.EmbedMultipleConfs(m_3d, numConfs=num_of_conformer, numThreads=0)
+m_confs = AllChem.EmbedMultipleConfs(m_3d, numConfs=num_of_conformer, pruneRmsThresh=rms_thresh, numThreads=0)
 conf_ids = list(m_confs) #create list of conformer IDs
 
 # Align molecules and optimize energy with MMFF
-print("\nOptimizing conformeres with MMFF")
+print("\nOptimizing conformers with MMFF")
 AllChem.AlignMolConformers(m_3d, RMSlist=rmslist)
 rms = AllChem.GetConformerRMS(m_3d, 1, 9, prealigned=True)
 results_MMFF = AllChem.MMFFOptimizeMoleculeConfs(m_3d, maxIters=max_iter, numThreads=0)
 
 # Search for the min energy conformer from results(tuple(is_converged,energy))
-print("\nSearching conformers by MMFF ")   
+print("\nSearching for min E conformer by MMFF ")   
 for index, result in enumerate(results_MMFF):
     if(min_energy_MMFF>result[1]):       
         min_energy_MMFF=result[1]
@@ -85,7 +93,7 @@ for index, result in enumerate(results_MMFF):
 ## deltaE = results_MMFF - min_energy_MMFF
 
 # Write minimum energy conformer into a SDF file
-w = Chem.SDWriter(mol_name+'_min-E-conf-MMFF.sdf')
+w = Chem.SDWriter(output_dir+mol_name+'_min-E-conf-MMFF.sdf')
 w.write(Chem.Mol(m_3d,False,min_energy_index_MMFF))
 w.flush()
 w.close()
@@ -103,16 +111,16 @@ for index, result in enumerate(results_MMFF):
             conf_ener.append(result[1])
             print(index,":",result[1])
 
-output_sdf = mol_name + '_conf.sdf'
+output_sdf = output_dir + mol_name + '_conf.sdf'
 open(output_sdf, 'w+')
-print("index, energy",file=open(mol_name + '_E_list.csv','w+'))
+print("index, energy",file=open(output_dir + mol_name + '_E_list.csv','w+'))
 
 #save the library to individual mol files
 for index in conf_keep:
     print(f'conf_{index} {Chem.MolToMolBlock(m_3d, confId=index)}',file=open(output_sdf,'a+'))
     rel_ener = conf_ener[conf_list] - min_energy_MMFF
     print(f'\nEnergy = {rel_ener}\n$$$$',file=open(output_sdf,'a+'))
-    print(index,", ",rel_ener,file=open(mol_name + '_E_list.csv','a+'))
+    print(index,", ",rel_ener,file=open(output_dir + mol_name + '_E_list.csv','a+'))
 
     conf_list = conf_list + 1
 
