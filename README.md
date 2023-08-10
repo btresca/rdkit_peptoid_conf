@@ -1,5 +1,7 @@
 # rdkit_peptoid_conf
-Python scripts to generate conformers using RDKit for the Tresca Lab.  
+Python scripts to generate conformers using RDKit for the Tresca Lab.
+
+Available in Google Collab: https://colab.research.google.com/drive/1Th9rzShVMxwvZ5uXaR4IL6SsSSapCTfw?usp=sharing
   
 Install RDKit in python environment following Conda instructions here https://www.rdkit.org/docs/Install.html  
 Input can be .mol file or SMILES, either can be generated from ChemDoodle  
